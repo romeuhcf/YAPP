@@ -14,11 +14,11 @@ module YAPP
     end
 
 
-    def parse(parsable, &callback)
+    def parse(parsable, generator=nil, &callback)
       io = to_io(parsable)
-      result = @root.parse(io, nil, nil, callback)
+      result = @root.parse(io, nil, nil, generator)
       io.close if io.respond_to? 'close'
-      callback ? nil : result[:children] 
+      result
     end
 
     protected

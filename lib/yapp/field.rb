@@ -34,9 +34,9 @@ module YAPP
 
 
     def get_real_handler
-      return nil unless  @handler 
-
-      hd =if @handler.is_a? Symbol
+      hd = @model.get_handler(:default) unless @handler
+     
+      hd ||= if @handler.is_a? Symbol
         @model.get_handler(@handler)
       elsif @handler.is_a? Proc
         @handler	

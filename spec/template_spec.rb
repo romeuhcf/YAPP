@@ -1,55 +1,58 @@
 require "spec_helper" 
 require 'yapp/template'
+require 'yapp/generators/nokogiri'
 include YAPP
-=begin # this is a simple template
 
-0|HEADER
-1|table
-2|thead     |a     |b     |c
-3|row       |1
-4|cell      |11        |
-4|cell      |12        |
-4|cell      |13        |
-3|row       |2         |
-4|cell      |21        |
-4|cell      |22        |
-4|cell      |23        |
+simple_template =<<EOF
+0|A HEADER
+1|aniversarios                                  987987987987999
+2|nome     telefone      nascimento     idade
+3|romeu    555-22222     07/12/1980     32
+3|juliana  555-55555     02/10/1984     28
+3|gustavo  555-88888     12/10/2010     3
 9|2|rows    |5|cells   |
-  
-=end
+EOF
 
 describe Template do
   describe "template DSL" do
     before do
       @tpl = Template.new do
-        first_char_at 1
+	first_char_at 0
 
+        formatter :inteiro, &:to_i
         formatter :default do |v|
-          v.strip!
+          v.strip        
         end
 
         model :header, /^0/ do
-          field :type_id, 1
+          field :type_id, 0..2
           field :desc, 10
 
           model :table, /^1/ do
-            field :type_id, 1
-            field :desc, 10
+            field :type_id, 0..2
+            field :desc, 20
             model :thead, /^2/ do
+              field :campo1, 2..11
+              field :campo2, 10
+              field :campo3, 16
+              field :campo4, 10
             end
             model :row, /^3/ do
-              model :cell, /^4/ do
-                formatter :money, &:to_f
-                formatter :date do |v|
+              field :id, 2
+              field :name, 9
+              field :telefone, 14
+              field :nascimento, 10, :date
+              field :idade, 10, :inteiro
+              formatter :money, &:to_f
+              formatter :date do |v|
                   begin
                     v.strip!
-                    DateTime.strptime(v, '%Y%m%d') unless v.blank?
+                    DateTime.strptime(v, '%d/%m/%Y') unless v.nil? || v.empty?
                   rescue
                     raise ArgumentError, "#{$!} DateTime.strptime(#{v} , '%Y%m%d') ; "
                   end
-                end
-
               end
+
             end
           end
         end
@@ -77,7 +80,6 @@ describe Template do
         @tpl.root.children[:header].should be_instance_of Model
         @tpl.root.children[:header].children[:table].should be_instance_of Model
         @tpl.root.children[:header].children[:table].children[:row].should be_instance_of Model
-        @tpl.root.children[:header].children[:table].children[:row].children[:cell].should be_instance_of Model
         @tpl.root.children[:header].children[:table].children[:foo].should be_nil
       end
 
@@ -96,12 +98,21 @@ describe Template do
     end
 
     it "should have formatters for root" do
-      @tpl.root.formatters.count.should == 1
+      @tpl.root.formatters.count.should == 2
     end
 
     it "should have formatters for any nested model" do
-      @tpl.root.children[:header].children[:table].children[:row].formatters.count.should == 0
-      @tpl.root.children[:header].children[:table].children[:row].children[:cell].formatters.count.should == 2
+      @tpl.root.children[:header].children[:table].children[:row].formatters.count.should == 2
+      @tpl.root.children[:header].children[:table].formatters.count.should == 0
+    end
+
+    it "should parse a simple template from string and return a hash" do
+      @tpl.parse(simple_template).should be_instance_of Hash
+      @tpl.parse(simple_template).to_s
+    end
+    it "should parse a simple template from string and return a hash" do
+      @tpl.parse(simple_template, YAPP::Generators::Nokogiri.new).should be_instance_of Nokogiri::XML::Element
+      @tpl.parse(simple_template, YAPP::Generators::Nokogiri.new).to_xml.should == "<root>\n  <header type_id=\"0|\" desc=\"A HEADER\">\n    <table type_id=\"1|\" desc=\"aniversarios\">\n      <thead campo1=\"nome\" campo2=\"telefone\" campo3=\"nascimento\" campo4=\"idade\"/>\n      <row id=\"3|\" name=\"romeu\" telefone=\"555-22222\" nascimento=\"1980-12-07T00:00:00+00:00\" idade=\"32\"/>\n      <row id=\"3|\" name=\"juliana\" telefone=\"555-55555\" nascimento=\"1984-10-02T00:00:00+00:00\" idade=\"28\"/>\n      <row id=\"3|\" name=\"gustavo\" telefone=\"555-88888\" nascimento=\"2010-10-12T00:00:00+00:00\" idade=\"3\"/>\n    </table>\n  </header>\n  <footer/>\n</root>"
     end
   end
 end

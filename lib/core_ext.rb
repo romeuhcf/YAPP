@@ -1,8 +1,8 @@
-class Fixnum
-  def length
-    self
-  end
-end
+#class Fixnum
+#  def length
+#    self
+#  end
+#end
 
 class Range
   def length
