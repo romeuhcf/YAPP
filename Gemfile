@@ -6,4 +6,3 @@ gemspec
 gem 'cucumber'
 gem 'simplecov'
 gem 'rspec'
-
