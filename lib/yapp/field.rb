@@ -25,7 +25,6 @@ module YAPP
     def get_value(line)
       _range =  (range.first - (first_char_at))...(range.last - (first_char_at))
       v = line[_range]
-      call_handler(v)
     end
 
     def first_char_at
@@ -47,9 +46,17 @@ module YAPP
       hd
     end
 
-    def call_handler(value)
+    def format(value, data_row)
       handler = get_real_handler
-      handler ? handler.call(value) : value
+      if handler
+        if handler.arity >= 2
+          handler.call(value, data_row)
+        else
+          handler.call(value)
+        end
+      else 
+        value
+      end
     end
 
   end

@@ -10,6 +10,10 @@ module YAPP
         fields.each do |name, field|
           f[name] = field.get_value(line)
         end
+
+        fields.each do |name, field|
+          f[name] = field.format(f[name], f)
+        end
         f
       end
  
@@ -44,7 +48,7 @@ module YAPP
                 parent.reject_line(line)
                 return curr
               else
-                raise "ParseError on line #{io.lineno}:#{line.strip[0,15]}..., no model match!"
+                raise "ParseError on line #{io.lineno}:#{line.strip[0,115]}..., no model match!"
               end
             end
             line = rejected_line

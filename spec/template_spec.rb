@@ -24,9 +24,15 @@ describe Template do
           v.strip        
         end
 
+
+
         model :header, /^0/ do
           field :type_id, 0..2
-          field :desc, 10
+          field :desc, 10, :binary_proc
+
+          formatter :binary_proc do |v, data|
+            data[:desc].strip
+          end
 
           model :table, /^1/ do
             field :type_id, 0..2

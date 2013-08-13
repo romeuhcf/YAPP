@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'yapp/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "YAPP"
+  spec.name          = "yapp"
   spec.version       = YAPP::VERSION
   spec.authors       = ["Romeu Fonseca"]
   spec.email         = ["romeu.hcf@gmail.com"]
@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "simplecov"
   spec.add_dependency "nokogiri"
-  spec.add_dependency "activesupport", "~> 3.2.13"
+  #spec.add_dependency "activesupport", "~> 3.2.13"
 end

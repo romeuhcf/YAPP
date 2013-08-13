@@ -4,7 +4,9 @@ module YAPP
     class Nokogiri
       def create_node(name, parent_node, raw_line, lineno)
         raise ArgumentError, "Blank name" unless name
-        ::Nokogiri::XML::Node.new(name.to_s, parent_node ? parent_node.document : nil)
+        n = ::Nokogiri::XML::Node.new(name.to_s, parent_node ? parent_node.document : nil)
+        n.parent = parent_node
+        n
       end
       def add_fields(node, field_hash)
         field_hash.each do|k,v|

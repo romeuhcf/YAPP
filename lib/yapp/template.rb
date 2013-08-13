@@ -1,5 +1,4 @@
 require 'stringio'
-require 'active_support'
 require 'core_ext'
 require 'yapp/exceptions'
 require 'yapp/field'
@@ -16,7 +15,7 @@ module YAPP
 
     def parse(parsable, generator=nil, &callback)
       io = to_io(parsable)
-      result = @root.parse(io, nil, nil, generator)
+      result = @root.parse(io, nil, nil, generator, callback)
       io.close if io.respond_to? 'close'
       result
     end
