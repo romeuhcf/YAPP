@@ -1,12 +1,13 @@
-require 'yapp/generators/hash'
+require 'active_support/hash_with_indifferent_access'
 module YAPP
 
   class Model
     module Parsing
+      attr_reader :rejected_line
       def parse_fields(line)
         line.chomp!
         line = line_pre_handler.call(line) if line_pre_handler
-        f = {}
+        f = ActiveSupport::HashWithIndifferentAccess.new
         fields.each do |name, field|
           f[name] = field.get_value(line)
         end
@@ -21,52 +22,40 @@ module YAPP
         formatters[handler_sym] || (parent ? parent.get_handler(handler_sym) : nil )
       end
 
-      def parse(io, parent_node, my_line = nil, generator = nil, callback = nil)
-        @generator = generator || @generator || Generators::Hash.new
+      def spell(event, io, callback, line = nil)
+          fields = line ? parse_fields(line)  : nil
+          callback.call(event, self, fields, line, io.lineno) if callback
+      end
 
-        curr = nil
-        if my_line
-          fields = parse_fields(my_line)
-          curr = @generator.create_node(name, parent_node, my_line, io.lineno)
-          @generator.add_fields(curr, fields)
-        else
-          curr = @generator.create_root
-        end
+      def parse(io, forwarded_line = nil, generator = nil, callback)
  
-        callback.call(curr) if callback
+         if match?(line=forwarded_line)
+           spell(:open, io, callback, line)
+         end
 
-        io.each_line do |line|
-          next if line.strip.size == 0 # XXX...should not do this in strict mode
- 
-          loop do
-            if m = children.values.find{|c| c.match? line }
-              if _child = m.parse(io, curr, line, generator, callback)
-                @generator.add_child(curr,  m.name, _child)
-              end
-            else # se a linha nao eh de nenhum dos filhos 
-              if parent
-                parent.reject_line(line)
-                return curr
-              else
-                raise "ParseError on line #{io.lineno}:#{line.strip[0,115]}..., no model match!"
-              end
-            end
-            line = rejected_line
- 
-            break unless line
- 
-          end
-        end
- 
-        callback ? nil : curr  # soh retorna algo se nao tiver proc
+         child_rejected_line = nil
+
+         while line = child_rejected_line || io.gets
+           line.strip!
+           child_rejected_line = nil
+           if sub_model = children.values.find{|c| c.match? line }
+             sub_model.parse(io, line, generator, callback)
+             child_rejected_line = sub_model.rejected_line
+             next
+           end
+
+           reject_line(line)
+           break
+         end
+         spell(:close, io, callback)
       end
  
       def reject_line(line)
-        @rejected = line
+        @rejected_line = line
       end
  
       def rejected_line
-        _r , @rejected = @rejected, nil
+        _r , @rejected_line = @rejected_line, nil
         _r 
       end
  

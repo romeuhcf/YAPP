@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = YAPP::VERSION
   spec.authors       = ["Romeu Fonseca"]
   spec.email         = ["romeu.hcf@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Yet another positional parser}
+  spec.summary       = %q{For positional text}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "simplecov"
+  spec.add_development_dependency "pry-debugger"
   spec.add_dependency "nokogiri"
-  #spec.add_dependency "activesupport", "~> 3.2.13"
+  spec.add_dependency "activesupport", ">= 4.0"
 end

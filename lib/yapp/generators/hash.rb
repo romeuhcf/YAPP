@@ -1,6 +1,26 @@
 module YAPP
   module Generators 
     class Hash 
+      def parse(template, parseable)
+        root = {:name => :root, :attributes => {}, :children => {}}
+        current_node = root
+        parent = nil
+        template.parse(parseable) do |evt, model, fields, line, lineno|
+           if evt == :open
+              parent = current_node 
+              current_node = {:name => model.name, :attributes => fields, :children =>{}}
+              parent[:children][model.name]||=[]
+              parent[:children][model.name] << current_node
+           elsif evt == :close
+             current_node = parent
+           end
+        end
+        root
+
+      end
+
+
+
       def add_child(node, name, child)
         node[:children]||={}
         node[:children][name] ||=[]

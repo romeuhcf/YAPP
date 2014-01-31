@@ -1,6 +1,7 @@
 require "spec_helper" 
 require 'yapp/template'
 require 'yapp/generators/nokogiri'
+require 'yapp/generators/hash'
 include YAPP
 
 simple_template =<<EOF
@@ -78,7 +79,7 @@ describe Template do
     end
 
     describe "children" do
-      it "should be an hash" do
+      it "should be a hash" do
         @tpl.root.children.should be_instance_of Hash
       end
 
@@ -113,12 +114,12 @@ describe Template do
     end
 
     it "should parse a simple template from string and return a hash" do
-      @tpl.parse(simple_template).should be_instance_of Hash
-      @tpl.parse(simple_template).to_s
+      YAPP::Generators::Hash.new.parse(@tpl, simple_template).should be_instance_of Hash
+      YAPP::Generators::Hash.new.parse(@tpl, simple_template)[:children][:header].first[:children][:table].first[:attributes][:desc].should == 'aniversarios'
     end
-    it "should parse a simple template from string and return a hash" do
-      @tpl.parse(simple_template, YAPP::Generators::Nokogiri.new).should be_instance_of Nokogiri::XML::Element
-      @tpl.parse(simple_template, YAPP::Generators::Nokogiri.new).to_xml(:indent => 0).gsub(/[\n]*/, '').split(/[< ]/).sort.should == '<root><header type_id="0|" desc="A HEADER"><table type_id="1|" desc="aniversarios"><thead campo1="nome" campo2="telefone" campo3="nascimento" campo4="idade"/><row id="3|" name="romeu" telefone="555-22222" nascimento="1980-12-07T00:00:00+00:00" idade="32"/><row id="3|" name="juliana" telefone="555-55555" nascimento="1984-10-02T00:00:00+00:00" idade="28"/><row id="3|" name="gustavo" telefone="555-88888" nascimento="2010-10-12T00:00:00+00:00" idade="3"/></table></header><footer/></root>'.split(/[< ]/).sort
+    it "should parse a simple template from string and return a xml" do
+      YAPP::Generators::Nokogiri.new.parse(@tpl, simple_template).should be_instance_of Nokogiri::XML::Element
+      YAPP::Generators::Nokogiri.new.parse(@tpl, simple_template).to_xml(:indent => 0).gsub(/[\n]*/, '').split(/[< ]/).sort.should == '<root><header type_id="0|" desc="A HEADER"><table type_id="1|" desc="aniversarios"><thead campo1="nome" campo2="telefone" campo3="nascimento" campo4="idade"/><row id="3|" name="romeu" telefone="555-22222" nascimento="1980-12-07T00:00:00+00:00" idade="32"/><row id="3|" name="juliana" telefone="555-55555" nascimento="1984-10-02T00:00:00+00:00" idade="28"/><row id="3|" name="gustavo" telefone="555-88888" nascimento="2010-10-12T00:00:00+00:00" idade="3"/></table></header><footer/></root>'.split(/[< ]/).sort
     end
   end
 end

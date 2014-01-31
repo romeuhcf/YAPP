@@ -13,20 +13,20 @@ module YAPP
     end
 
 
-    def parse(parsable, generator=nil, &callback)
-      io = to_io(parsable)
-      result = @root.parse(io, nil, nil, generator, callback)
+    def parse(parseable, generator=nil, &callback)
+      io = to_io(parseable)
+      result = @root.parse(io, nil, generator, callback)
       io.close if io.respond_to? 'close'
       result
     end
 
     protected
-    def to_io(parsable)
-      return parsable if parsable.is_a? IO
-      return parsable if parsable.is_a? StringIO
-      return ArgumentError, "Don't know how to parse a #{parsable.class.name}" unless parsable.is_a? String
-      return File.open(parsable, 'rb') if File.exists?(parsable)
-      StringIO.new(parsable)
+    def to_io(parseable)
+      return parseable if parseable.is_a? IO
+      return parseable if parseable.is_a? StringIO
+      return ArgumentError, "Don't know how to parse a #{parseable.class.name}" unless parseable.is_a? String
+      return File.open(parseable, 'rb') if File.exists?(parseable)
+      StringIO.new(parseable)
     end
   end
 end
